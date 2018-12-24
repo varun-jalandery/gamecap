@@ -1,0 +1,51 @@
+{
+  "name": "iris",
+  "version": "1.0.0",
+  "description": "Schdeuler",
+  "main": "bin/api.js",
+  "scripts": {
+    "test": "NODE_PATH=. NODE_ENV=test mocha --recursive",
+    "test:coverage": "NODE_PATH=. NODE_ENV=test istanbul cover node_modules/mocha/bin/_mocha -- --recursive --colors --reporter spec test/",
+    "lint": "eslint --ext=.js bin/* src/* test/*",
+    "lint:fix": "eslint --ext=.js bin/* src/* test/* --fix"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@bitbucket.org/jvarun/iris.git"
+  },
+  "keywords": [
+    "scheduler",
+    "nodejs",
+    "queue"
+  ],
+  "pre-commit": [
+    "test",
+    "lint"
+  ],
+  "author": "Circles.Life",
+  "license": "ISC",
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "eslint": "^5.0.1",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.14.0",
+    "istanbul": "^1.1.0-alpha.1",
+    "karma": "^3.0.0",
+    "karma-coverage": "^1.1.2",
+    "mocha": "^5.2.0",
+    "pre-commit": "^1.2.2"
+  },
+  "homepage": "https://bitbucket.org/jvarun/iris#readme",
+  "dependencies": {
+    "amqplib": "^0.5.2",
+    "body-parser": "^1.18.3",
+    "dotenv": "^6.1.0",
+    "express": "^4.16.4",
+    "express-winston": "^3.0.1",
+    "mongodb": "^3.1.9",
+    "nodemailer": "^4.7.0",
+    "uuid": "^3.3.2",
+    "validator": "^10.9.0",
+    "winston": "^3.1.0"
+  }
+}

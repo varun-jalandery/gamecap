@@ -1,0 +1,18 @@
+{
+  "apps" :
+  [
+    {
+      "name"        : "api",
+      "script"      : "bin/api.js",
+      "instances"   : 1,
+      "args"        : [],
+      "watch"       : ["src", "bin"],
+      "node_args"   : "",
+      "merge_logs"  : true,
+      "env": {
+        "NODE_ENV": "development",
+        "NODE_PATH": "."
+      }
+    }
+  ]
+}

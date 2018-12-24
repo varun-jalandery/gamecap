@@ -1,0 +1,51 @@
+version: '3.1'
+services:
+  api:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/code
+    command: >
+      /bin/bash -c "
+        sleep 10;
+        pm2-docker start deploy/development.json;
+      "
+    depends_on:
+      - mongo
+      - rabbitmq
+      - mailcatcher
+    networks:
+      - webnet
+
+  mongo:
+    image: "mongo"
+    environment:
+      - MONGO_DATA_DIR=/data/db
+      - MONGO_LOG_DIR=/dev/null
+    volumes:
+      - ./data/db:/data/db
+    ports:
+      - "27017:27017"
+    command: mongod --smallfiles --logpath=/dev/null # --quiet
+    networks:
+      - webnet
+
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    networks:
+      - webnet
+
+  mailcatcher:
+    image: "schickling/mailcatcher"
+    ports:
+      - "1080:1080"
+      - "1025:1025"
+    networks:
+      - webnet
+
+networks:
+  webnet:
