@@ -8,7 +8,7 @@ services:
       - .:/code
     command: >
       /bin/bash -c "
-        sleep 10;
+        sleep 15;
         pm2-docker start deploy/development.json;
       "
     depends_on:
@@ -24,7 +24,7 @@ services:
       - MONGO_DATA_DIR=/data/db
       - MONGO_LOG_DIR=/dev/null
     volumes:
-      - ./data/db:/data/db
+      - ./.data/db:/.data/db
     ports:
       - "27017:27017"
     command: mongod --smallfiles --logpath=/dev/null # --quiet

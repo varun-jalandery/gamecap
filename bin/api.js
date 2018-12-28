@@ -5,16 +5,17 @@ const Config = require('config');
 const App = require('src/lib/app');
 const { Logger, ReqLogger, } = require('src/lib/logger');
 const Mongo = require('src/lib/mongo');
-const RabbitMq = require('src/lib/rabbitmq');
+const RabbitMq = require('src/lib/rabbitmq/rabbitmq');
 const ApiEventRouter = require('src/router/api/event');
 const ErrorHandler = require('src/middleware/errorHandler');
+const Publisher = require('src/lib/rabbitmq/publisher');
 
-
-const server = express();
+const app = express();
 
 class Server {
     constructor() {
-        this.server = server;
+        this.app = app;
+        this.server = null;
     }
 
     async start() {
@@ -28,14 +29,18 @@ class Server {
             Logger.info('Routes starting');
             this.setRoutes();
             Logger.info('Routes started successfully');
-            Logger.info('Error Handler setting');
+            Logger.info('Error handler setting');
             this.setErrorHandler();
-            Logger.info('Error Handler set successfully');
+            Logger.info('Error handler set successfully');
             Logger.info('Not found(404) response setting');
             this.setNotFoundResponse();
             Logger.info('Not found(404) response set successfully');
             Logger.info(`Server starting listening at port ${Config.getApiHttpPort()}`);
             await this.startListening();
+            Logger.info('SIGINT handler setting');
+            this.setSIGINTHandler();
+            Logger.info('SIGINT handler set successfully');
+            this.test();
         } catch (err) {
             Logger.error(err.stack);
             process.exit(1);
@@ -52,19 +57,19 @@ class Server {
     }
 
     setMiddlewares() {
-        this.server.use(bodyParser.json());
+        this.app.use(bodyParser.json());
         if (!App.isProduction()) {
-            this.server.use(ReqLogger);
+            this.app.use(ReqLogger);
         }
     }
 
     setRoutes() {
-        this.server.use('/scheduler/v1/event', ApiEventRouter);
+        this.app.use('/scheduler/v1/event', ApiEventRouter);
     }
 
     async startListening() {
         return new Promise((resolve, reject) => {
-            this.server.listen(Config.getApiHttpPort(), (err) => {
+            this.server = this.app.listen(Config.getApiHttpPort(), (err) => {
                 if (err) {
                     return reject(err);
                 }
@@ -73,14 +78,50 @@ class Server {
         });
     }
 
+    setSIGINTHandler() {
+        process.once('SIGINT', () => {
+            this.cleanResources();
+            this.close();
+            process.exit(1);
+        });
+    }
+
+    close() {
+        if (this.server) {
+            this.server.close();
+            Logger.info('Server closed');
+        }
+    }
+
+    cleanResources() {
+        Logger.info('RabbitMq connections closing');
+        RabbitMq.closeAllConnections();
+        Logger.info('RabbitMq connections closed');
+        this.server.close();
+    }
+
     setErrorHandler() {
-        this.server.use(ErrorHandler.handle);
+        this.app.use(ErrorHandler.handle);
     }
 
     setNotFoundResponse() {
-        this.server.all('*', (req, res) => {
+        this.app.all('*', (req, res) => {
             res.status(404).send('Not Found');
         });
+    }
+
+    test() {
+        let counter = 0;
+        setInterval(async () => {
+            for (let i = 0; i < 1; i += 1) {
+                counter += 1;
+                try {
+                    await Publisher.publish(`${counter}`, 'test249');
+                } catch (err) {
+                    console.error(err.stack);
+                }
+            }
+        }, 1000);
     }
 }
 
