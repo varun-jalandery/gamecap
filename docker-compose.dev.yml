@@ -5,7 +5,7 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - .:/code
+      - .:/usr/src/app
     command: >
       /bin/bash -c "
         sleep 15;

@@ -3,4 +3,5 @@
 coverage
 data
 .env
+node_modules
 

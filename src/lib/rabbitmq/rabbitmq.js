@@ -21,7 +21,7 @@ class RabbitMq {
                 .catch(err => reject(err));
         });
     }
-e
+
     getChannel(chanId = 'default', connId = 'default') {
         return new Promise((resolve, reject) => {
             this.connect(connId)
